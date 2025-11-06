@@ -1,0 +1,25 @@
+# Datos de MongoDB (no subir bases de datos)
+mongo-data/
+data-base-primary/
+data-base-replica/
+
+# Archivos de Docker
+*.log
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node modules si agregas Node.js
+node_modules/
+
+# Variables de entorno sensibles (si las usas)
+.env

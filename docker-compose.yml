@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: Kajubva
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo-data:/data/db
+    networks:
+      - app-net
+
+  api: 
+    build: ./api
+    container_name: java-api
+    restart: always
+    depends_on:
+      - mongo
+    environment:
+      MONGO_URI: mongodb://admin:admin123@mongo:27017/proyecto?authSource=admin
+      PORT: 8080
+    ports:
+      - "8080:8080"
+    networks:
+      - app-net
+
+  frontend:
+    image: nginx:alpine
+    container_name: web-frontend
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    depends_on:
+      - api
+    networks:
+      - app-net
+
+networks:
+  app-net:
