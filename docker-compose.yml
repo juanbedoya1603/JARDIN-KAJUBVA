@@ -1,5 +1,5 @@
 services:
-  # -------------------- FRONTEND --------------------
+  # ---------- FRONTEND ----------
   frontend:
     image: nginx:latest
     container_name: jardin_frontend
@@ -7,63 +7,62 @@ services:
       - "8080:80"
     volumes:
       - ./frontend:/usr/share/nginx/html:ro
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
     depends_on:
       - api
 
-  # -------------------- API --------------------
+  # ---------- API (Spring Boot) ----------
   api:
     build: ./api
     container_name: jardin_api
     ports:
-      - "3000:3000"
+      - "3000:8080"
     environment:
-      - MONGO_URI=mongodb://mongo-primary:27017/jardin
+      - MONGO_URI=mongodb://mongo-primary:27017,mongo-replica:27017/jardin?replicaSet=rs0
     depends_on:
-      mongo-primary:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "ps aux | grep java || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
+      - mongo-setup
 
-  # -------------------- MONGO PRIMARY --------------------
+  # ---------- MONGO PRIMARIO ----------
   mongo-primary:
     image: mongo:7.0
     container_name: jardin_mongo_primary
-    restart: always
     ports:
       - "27017:27017"
     volumes:
       - mongo-primary-data:/data/db
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    command: ["mongod", "--replSet", "rs0"]
 
-  # -------------------- MONGO REPLICA --------------------
+  # ---------- MONGO RÉPLICA ----------
   mongo-replica:
     image: mongo:7.0
     container_name: jardin_mongo_replica
-    restart: always
     ports:
       - "27018:27017"
     volumes:
       - mongo-replica-data:/data/db
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    command: ["mongod", "--replSet", "rs0"]
 
-# -------------------- VOLUMENES --------------------
+  # ---------- SETUP DEL REPLICA SET ----------
+  mongo-setup:
+    image: mongo:7.0
+    container_name: jardin_mongo_setup
+    depends_on:
+      - mongo-primary
+      - mongo-replica
+    entrypoint: >
+      bash -c "
+      sleep 5 &&
+      mongosh --host mongo-primary:27017 --eval
+      '
+        rs.initiate({
+          _id: \"rs0\",
+          members: [
+            { _id: 0, host: \"mongo-primary:27017\" },
+            { _id: 1, host: \"mongo-replica:27017\" }
+          ]
+        })
+      '
+      "
+
 volumes:
   mongo-primary-data:
   mongo-replica-data:

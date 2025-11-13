@@ -1,10 +1,506 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Proyecto Final - Docker</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Semillas - Jardín</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .form-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .table-section {
+            margin-top: 30px;
+        }
+
+        .table-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .btn-edit {
+            background: #ffc107;
+            color: #000;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 5px;
+            font-weight: 600;
+        }
+
+        .btn-edit:hover {
+            background: #ffb300;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .api-status {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body>
-  <h1>Frontend Funcionando Exitosamente</h1>
+    <div class="container">
+        <div class="header">
+            <h1>🌱 Gestión de Semillas</h1>
+            <p>Sistema de control de inventario</p>
+        </div>
+
+        <div class="content">
+            <!-- API Status -->
+            <div class="api-status" id="apiStatus">
+                ⏳ Verificando conexión con la API...
+            </div>
+
+            <!-- Mensajes de alerta -->
+            <div id="alertContainer"></div>
+
+            <!-- Formulario -->
+            <div class="form-section">
+                <h2 id="formTitle">➕ Agregar Nueva Semilla</h2>
+                <form id="semillaForm">
+                    <input type="hidden" id="semillaId">
+                    
+                    <div class="form-group">
+                        <label for="nombre">Nombre de la Semilla:</label>
+                        <input type="text" id="nombre" placeholder="Ej: Tomate Cherry" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tipo">Tipo:</label>
+                        <input type="text" id="tipo" placeholder="Ej: Hortaliza, Flor, Hierba" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="precio">Precio (COP):</label>
+                        <input type="number" id="precio" step="0.01" placeholder="Ej: 15000" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Guardar Semilla</button>
+                    <button type="button" class="btn btn-secondary" id="cancelBtn" style="display: none;">Cancelar</button>
+                </form>
+            </div>
+
+            <!-- Tabla de semillas -->
+            <div class="table-section">
+                <h2>📋 Listado de Semillas</h2>
+                <div id="tableContainer">
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            <path d="M2 17l10 5 10-5"/>
+                            <path d="M2 12l10 5 10-5"/>
+                        </svg>
+                        <p>Cargando semillas...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // URL de tu API
+        const API_URL = 'http://localhost:8081/api/semillas';
+
+        let editMode = false;
+
+        // Cargar semillas al iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            checkApiConnection();
+            loadSemillas();
+        });
+
+        // Verificar conexión con la API
+        async function checkApiConnection() {
+            const statusDiv = document.getElementById('apiStatus');
+            try {
+                const response = await fetch(API_URL);
+                if (response.ok) {
+                    statusDiv.style.background = '#d4edda';
+                    statusDiv.style.borderColor = '#c3e6cb';
+                    statusDiv.style.color = '#155724';
+                    statusDiv.textContent = '✅ Conectado a la API correctamente';
+                } else {
+                    statusDiv.textContent = '❌ API responde pero hay un error: ' + response.status;
+                }
+            } catch (error) {
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.borderColor = '#f5c6cb';
+                statusDiv.style.color = '#721c24';
+                statusDiv.textContent = '❌ No se puede conectar a la API. Verifica que esté corriendo en localhost:8081';
+                console.error('Error de conexión:', error);
+            }
+        }
+
+        // Mostrar alerta
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alertContainer.appendChild(alert);
+
+            setTimeout(() => {
+                alert.remove();
+            }, 3000);
+        }
+
+        // Cargar todas las semillas
+        async function loadSemillas() {
+            try {
+                const response = await fetch(API_URL);
+                const semillas = await response.json();
+                
+                const tableContainer = document.getElementById('tableContainer');
+                
+                if (semillas.length === 0) {
+                    tableContainer.innerHTML = `
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <p>No hay semillas registradas. ¡Agrega la primera!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let tableHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Precio</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                semillas.forEach(semilla => {
+                    tableHTML += `
+                        <tr>
+                            <td>${semilla.id.substring(0, 8)}...</td>
+                            <td>${semilla.nombre}</td>
+                            <td>${semilla.tipo}</td>
+                            <td>$${semilla.precio.toLocaleString('es-CO')}</td>
+                            <td>
+                                <button class="btn-edit" onclick="editSemilla('${semilla.id}')">✏️ Editar</button>
+                                <button class="btn-delete" onclick="deleteSemilla('${semilla.id}')">🗑️ Eliminar</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                tableHTML += `
+                        </tbody>
+                    </table>
+                `;
+
+                tableContainer.innerHTML = tableHTML;
+            } catch (error) {
+                console.error('Error al cargar semillas:', error);
+                showAlert('Error al cargar las semillas. Verifica que la API esté corriendo.', 'error');
+            }
+        }
+
+        // Guardar semilla (crear o actualizar)
+        document.getElementById('semillaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById('semillaId').value;
+            const semilla = {
+                nombre: document.getElementById('nombre').value,
+                tipo: document.getElementById('tipo').value,
+                precio: parseFloat(document.getElementById('precio').value)
+            };
+
+            console.log('Enviando semilla:', semilla);
+
+            try {
+                let response;
+                if (editMode && id) {
+                    // Actualizar
+                    response = await fetch(`${API_URL}/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(semilla)
+                    });
+                    console.log('Respuesta PUT:', response);
+                    showAlert('✅ Semilla actualizada correctamente');
+                } else {
+                    // Crear
+                    response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(semilla)
+                    });
+                    console.log('Respuesta POST:', response);
+                    showAlert('✅ Semilla creada correctamente');
+                }
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Semilla guardada:', data);
+                    resetForm();
+                    loadSemillas();
+                } else {
+                    console.error('Error en respuesta:', response.status);
+                    showAlert('❌ Error al guardar: ' + response.status, 'error');
+                }
+            } catch (error) {
+                console.error('Error completo:', error);
+                showAlert('❌ Error al guardar la semilla: ' + error.message, 'error');
+            }
+        });
+
+        // Editar semilla
+        async function editSemilla(id) {
+            try {
+                const response = await fetch(API_URL);
+                const semillas = await response.json();
+                const semilla = semillas.find(s => s.id === id);
+
+                if (semilla) {
+                    document.getElementById('semillaId').value = semilla.id;
+                    document.getElementById('nombre').value = semilla.nombre;
+                    document.getElementById('tipo').value = semilla.tipo;
+                    document.getElementById('precio').value = semilla.precio;
+
+                    document.getElementById('formTitle').textContent = '✏️ Editar Semilla';
+                    document.getElementById('submitBtn').textContent = 'Actualizar Semilla';
+                    document.getElementById('cancelBtn').style.display = 'inline-block';
+                    editMode = true;
+
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('❌ Error al cargar la semilla', 'error');
+            }
+        }
+
+        // Eliminar semilla
+        async function deleteSemilla(id) {
+            if (!confirm('¿Estás seguro de eliminar esta semilla?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showAlert('✅ Semilla eliminada correctamente');
+                    loadSemillas();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('❌ Error al eliminar la semilla', 'error');
+            }
+        }
+
+        // Resetear formulario
+        function resetForm() {
+            document.getElementById('semillaForm').reset();
+            document.getElementById('semillaId').value = '';
+            document.getElementById('formTitle').textContent = '➕ Agregar Nueva Semilla';
+            document.getElementById('submitBtn').textContent = 'Guardar Semilla';
+            document.getElementById('cancelBtn').style.display = 'none';
+            editMode = false;
+        }
+
+        // Botón cancelar
+        document.getElementById('cancelBtn').addEventListener('click', resetForm);
+    </script>
 </body>
 </html>

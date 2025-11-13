@@ -1,13 +1,14 @@
-FROM eclipse-temurin:11-jre
+# Imagen base con Java
+FROM eclipse-temurin:17-jdk-alpine
 
+# Carpeta de trabajo
 WORKDIR /app
 
-# Script que mantiene el contenedor corriendo y genera logs
-RUN echo '#!/bin/sh\n\
-while true; do\n\
-  echo "$(date) - API Service is running and healthy..."\n\
-  echo "Connected to MongoDB at: $MONGO_URI"\n\
-  sleep 10\n\
-done' > /app/run.sh && chmod +x /app/run.sh
+# Copiar el JAR compilado (asegúrate que exista en target/)
+COPY target/jardin-api.jar /app/jardin-api.jar
 
-CMD ["/app/run.sh"]
+# Exponer el puerto interno de Spring Boot
+EXPOSE 8080
+
+# Comando para ejecutar la API
+CMD ["java", "-jar", "jardin-api.jar"]
